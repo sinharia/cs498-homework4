@@ -1,0 +1,15 @@
+Q1:
+They are decoupled for the sake of faster recovery - if the TMS fails, only the TMS will have to be discarded, as the SS will be untouched as the two components are decoupled. The Transaction Management System (TMS) handles transaction coordination - conflict detection, commit acceptance, logging, and timestamp management. The Storage System (SS) handles data storage and read serving. 
+
+Q2:
+The Resolver in the TMS is responsible for detecting conflicts between concurrent transactions. This happens during the new commit - the Resolver compares the read version with the last commit, before finalizing the new commit.
+
+Q3:
+The Read Version is the latest snapshot of the data that the transaction reads from. Because it's no less than the previously issued transaction commit version, all reads refer to this Read Version, which means there's no stale data in any of these reads, ensuring consistency.
+
+Q4:
+In Standard, if someone modifies the keys you are reading from, the transaction will get aborted, but in Snapshots, because this tracking isn't done, the transaction won't be aborted.
+Snapshots would probably be best for read-write transactions, where you'd want to read the value without the risk of the transaction being aborted.
+
+Q5:
+FDB Recovery is cheap because StorageServers just have to keep pulling data asynchronously, and because they're decoupled from the Transaction System, failure doesn't affect them. The new TS only has to get the Recovery Version from the Log System, instead of replaying the entire logs to restore the state.
